@@ -1,5 +1,6 @@
 package com.example.networkapp
 
+import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
@@ -14,9 +15,11 @@ import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.squareup.picasso.Picasso
 import org.json.JSONObject
+import java.io.File
 
 // TODO (1: Fix any bugs)
 // TODO (2: Add function saveComic(...) to save and load comic info automatically when app starts)
+private const val AUTO_SAVE_KEY = "auto_save"
 
 class MainActivity : AppCompatActivity() {
 
@@ -27,9 +30,19 @@ class MainActivity : AppCompatActivity() {
     lateinit var showButton: Button
     lateinit var comicImageView: ImageView
 
+    private var autoSave = false
+
+    private lateinit var preferences: SharedPreferences
+
+    private val internalFilename = "my_file"
+    private lateinit var file: File
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        preferences = getPreferences(MODE_PRIVATE)
+        file = File(filesDir, internalFilename)
 
         requestQueue = Volley.newRequestQueue(this)
 
@@ -46,8 +59,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun downloadComic (comicId: String) {
-        val url = "https://xkcd.com/$comicId/info.0.json"
-        requestQueue.add (
+        val url = "https://xkcd.com/${comicId}/info.0.json"
+        Volley.newRequestQueue(this).add (
             JsonObjectRequest(url, {showComic(it)}, {
             })
         )
@@ -57,6 +70,12 @@ class MainActivity : AppCompatActivity() {
         titleTextView.text = comicObject.getString("title")
         descriptionTextView.text = comicObject.getString("alt")
         Picasso.get().load(comicObject.getString("img")).into(comicImageView)
+    }
+
+    private fun saveComic () {
+        //activity should automatically load saved comics so that whenever activity is started it should display it
+
+
     }
 
 

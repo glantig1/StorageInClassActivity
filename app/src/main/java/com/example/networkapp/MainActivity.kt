@@ -15,7 +15,10 @@ import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.squareup.picasso.Picasso
 import org.json.JSONObject
+import java.io.BufferedReader
 import java.io.File
+import java.io.FileReader
+import java.io.IOException
 
 // TODO (1: Fix any bugs)
 // TODO (2: Add function saveComic(...) to save and load comic info automatically when app starts)
@@ -40,9 +43,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        preferences = getPreferences(MODE_PRIVATE)
-        file = File(filesDir, internalFilename)
 
         requestQueue = Volley.newRequestQueue(this)
 
@@ -74,7 +74,26 @@ class MainActivity : AppCompatActivity() {
 
     private fun saveComic () {
         //activity should automatically load saved comics so that whenever activity is started it should display it
+        preferences = getPreferences(MODE_PRIVATE)
+        file = File(filesDir, internalFilename)
+        autoSave = preferences.getBoolean(AUTO_SAVE_KEY, false)
+        findViewById<ImageView>(R.id.comicImageView).isActivated = autoSave
 
+        if (autoSave && file.exists()) {
+            try {
+                val br = BufferedReader(FileReader(file))
+                val text = StringBuilder()
+                var line: String?
+                while (br.readLine().also { line = it } != null) {
+                    text.append(line)
+                    text.append('\n')
+                }
+                br.close()
+                findViewById<TextView>(R.id.comicTitleTextView).setText(text.toString())
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+        }
 
     }
 
